@@ -8,4 +8,5 @@
 go run main.go
 打开index.html即可使用
 ![index](https://github.com/BruceLjc/go/assets/86994197/986e73e9-c732-461d-a653-839f8cf37c82)
-![Uploading postman.jpg…]()
+![postman](https://github.com/BruceLjc/go/assets/86994197/7c5e2e1a-ef0f-4ee3-9b25-83a6cf63b4e9)
+
