@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Management System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        h1,
+        h2 {
+            color: #333;
+            margin-top: 20px;
+        }
+
+        form,
+        ul {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        input,
+        button {
+            margin-bottom: 10px;
+        }
+
+        button {
+            cursor: pointer;
+        }
+
+        #studentList {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .studentItem {
+            margin-bottom: 10px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+
+        .deleteButton {
+            margin-left: 10px;
+            cursor: pointer;
+            color: #d9534f;
+        }
+
+        .deleteButton:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>Student Management System</h1>
+
+    <!-- Form to Create a New Student -->
+    <h2>Create Student</h2>
+    <form id="createForm">
+        <label for="name">Name:</label>
+        <input type="text" id="name" required>
+        <label for="age">Age:</label>
+        <input type="number" id="age" required>
+        <label for="grade">Grade:</label>
+        <input type="number" id="grade" required>
+        <button type="button" onclick="createStudent()">Create Student</button>
+    </form>
+
+    <!-- Form to Update a Student -->
+    <h2>Update Student</h2>
+    <form id="updateForm">
+        <label for="updateId">Student ID:</label>
+        <input type="number" id="updateId" required>
+        <label for="updateName">New Name:</label>
+        <input type="text" id="updateName" required>
+        <label for="updateAge">New Age:</label>
+        <input type="number" id="updateAge" required>
+        <label for="updateGrade">New Grade:</label>
+        <input type="number" id="updateGrade" required>
+        <button type="button" onclick="updateStudent()">Update Student</button>
+    </form>
+
+    <!-- List of Students -->
+    <h2>Students</h2>
+    <ul id="studentList"></ul>
+
+    <script>
+        // Fetch and display all students when the page loads
+        window.onload = function () {
+            refreshStudents();
+        };
+
+        // Function to create a new student
+        function createStudent() {
+            const name = document.getElementById('name').value;
+            const age = parseInt(document.getElementById('age').value, 10);
+            const grade = parseInt(document.getElementById('grade').value, 10);
+
+            if (isNaN(age) || isNaN(grade)) {
+                console.error('Invalid age or grade');
+                return;
+            }
+
+            fetch('http://127.0.0.1:8080/students', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ name, age, grade }),
+            })
+                .then(response => {
+                    console.log('Response status:', response.status);
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Success:', data);
+                    refreshStudents();
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        // Function to delete a student
+        function deleteStudent(studentId) {
+            fetch(`http://127.0.0.1:8080/students/${studentId}`, {
+                method: 'DELETE',
+            })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Success:', data);
+                    refreshStudents();
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        // Function to update a student
+        function updateStudent() {
+            const id = parseInt(document.getElementById('updateId').value, 10);
+            const name = document.getElementById('updateName').value;
+            const age = parseInt(document.getElementById('updateAge').value, 10);
+            const grade = parseInt(document.getElementById('updateGrade').value, 10);
+
+            if (isNaN(id) || isNaN(age) || isNaN(grade)) {
+                console.error('Invalid ID, age, or grade');
+                return;
+            }
+
+            fetch(`http://127.0.0.1:8080/students/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ name, age, grade }),
+            })
+                .then(response => {
+                    console.log('Response status:', response.status);
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Success:', data);
+                    refreshStudents();
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        // Function to refresh the list of students
+        function refreshStudents() {
+            fetch('http://127.0.0.1:8080/students')
+                .then(response => response.json())
+                .then(data => {
+                    const studentList = document.getElementById('studentList');
+                    studentList.innerHTML = ''; // Clear previous list
+
+                    // Display each student in the list
+                    data.forEach(student => {
+                        const studentItem = document.createElement('li');
+                        studentItem.className = 'studentItem';
+
+                        const nameText = document.createElement('span');
+                        nameText.textContent = `Name: ${student.name}, `;
+                        studentItem.appendChild(nameText);
+
+                        const ageText = document.createElement('span');
+                        ageText.textContent = `Age: ${student.age}, `;
+                        studentItem.appendChild(ageText);
+
+                        const gradeText = document.createElement('span');
+                        gradeText.textContent = `Grade: ${student.grade}`;
+                        studentItem.appendChild(gradeText);
+
+                        const deleteButton = document.createElement('span');
+                        deleteButton.className = 'deleteButton';
+                        deleteButton.textContent = 'Delete';
+                        deleteButton.onclick = function () {
+                            deleteStudent(student.ID);
+                        };
+                        studentItem.appendChild(deleteButton);
+
+                        studentList.appendChild(studentItem);
+                    });
+                })
+                .catch(error => console.error('Error:', error));
+        }
+    </script>
+
+</body>
+
+</html>
